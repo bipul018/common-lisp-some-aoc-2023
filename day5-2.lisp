@@ -88,8 +88,8 @@
 	  
 
 (defun parse-day5-1 (string)
-  "Works in windows only due to CRLF handling"
-  (let* ((groups (split-by-substring string (format nil "~C~%~C~%" #\Return #\Return)))
+  (let* ((end-str (detect-crlf-or-lf string))
+	 (groups (split-by-substring string (format nil "~a~a" end-str end-str)))
 	 (seed-str (car groups))
 	 (mappings-str (cdr groups))
 	 (seeds (parse-all-integers seed-str))
@@ -208,10 +208,18 @@
 (setf *seeds-2* (list (make-range 79 92)
 		      (make-range 55 67)))
 
+(defun detect-crlf-or-lf (string)
+  (let ((lf-pos (position #\Newline string)))
+    (if (null lf-pos)
+	""
+	(if (or (= 0 lf-pos) (not (equal #\Return (aref string (1- lf-pos)))))
+	    (format nil "~%")
+	    (format nil "~C~%" #\Return)))))
+	    
 
 (defun solve-day5-2 (string)
-  "Works in windows only due to CRLF handling"
-  (let* ((groups (split-by-substring string (format nil "~C~%~C~%" #\Return #\Return)))
+  (let* ((end-str (detect-crlf-or-lf string))
+	 (groups (split-by-substring string (format nil "~a~a" end-str end-str)))
 	 (seed-str (car groups))
 	 (mappings-str (cdr groups))
 	 (seeds (group-into-2 (parse-all-integers seed-str)))
@@ -236,7 +244,3 @@
 ;;    (format t "Solution list ~a~%" seeds)
     (apply #'min (loop for x in seeds collect (range.start x)))))
 
-
-(defun test-thing ()
-  (when (get-range-start-len '(0 158366385))
-    nil))
